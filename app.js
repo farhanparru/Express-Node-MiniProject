@@ -2,6 +2,7 @@ const express = require('express')
 const app= express()
 const fs = require('fs')
 const cookieParser = require('cookie-parser')
+const {encryptData,decryptData} = require('./encrypt.js')
 //Middlare
 app.use(express.urlencoded({extended:true}))
 // cookie parser express
@@ -45,7 +46,9 @@ app.post('/login',(req,res)=>{
         res.send('User Note Found')
         return;
     }
-    if(password !== password){
+    const encrypted = encryptData(password,10)
+    console.log(encrypted);
+    if(encrypted !== user.password){
         res.send('Password incorrect')
         return;
     }
@@ -75,14 +78,20 @@ app.post('/Signup', (req, res) => {
         res.send('User Already exists')
         return;
     }
-
+      const encrypted = encryptData(password,10)
     //Check Password
-  if(password !== confirmPassword){
+  if(password!== confirmPassword){
     res.send('Password and Confirm Password do not match')
     return;
   }
 
-    users.push({id:Math.floor( Math.random()*90000), username:username,password:password,email:email,confirmPassword:confirmPassword})
+    users.push({
+        id:Math.floor( Math.random()*90000), 
+         username:username,
+         password:encryptData(password,10),
+         email:email,
+         confirmPassword:encryptData(password,10)
+        })
 
     fs.writeFileSync('./users.json',JSON.stringify(users))
     res.redirect("/")
